@@ -22,6 +22,9 @@ fade_time=5.0
 fade_steps=60
 pause=5.0
 
+def remap(v, fromLo, fromHi, toLo, toHi):
+    return (toHi - toLo) * (v - fromLo) / (fromHi - fromLo) + toLo
+
 class App():
 	def __init__(self):
 		self.stdin_path = '/dev/null'
@@ -53,6 +56,18 @@ class App():
 				next_r = 100.0 * (1.0 - data["rgb"]["red"] / 255.0)
 				next_g = 100.0 * (1.0 - data["rgb"]["green"] / 255.0)
 				next_b = 100.0 * (1.0 - data["rgb"]["blue"] / 255.0)
+				
+				for x in range(0, fade_steps, 1):
+					self.led.ChangeDutyCycle( \
+						remap(x, 0, fade_steps, curr_r, next_r), \
+						remap(x, 0, fade_steps, curr_g, next_g), \
+						remap(x, 0, fade_steps, curr_b, next_b))
+
+					pinR.ChangeDutyCycle(r)
+					pinG.ChangeDutyCycle(g)
+					pinB.ChangeDutyCycle(b)
+
+					time.sleep(fade_time / fade_steps)
 
 				curr_r = next_r
 				curr_g = next_g
