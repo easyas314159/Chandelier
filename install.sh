@@ -29,6 +29,8 @@ echo "Copying daemon script"
 cp -f /root/Chandelier/chandelier.sh /etc/init.d/chandelier
 chmod a+x /etc/init.d/chandelier
 
-apt-get install python-daemon
+apt-get install python-daemon chkconfig
+
+chkconfig chandelier on
 
 popd
