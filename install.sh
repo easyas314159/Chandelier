@@ -25,9 +25,9 @@ if [ ! -e /etc/chandelier ]; then
     ln -s /etc/chandelier "$config"
 fi
 
-if [ ! -e /etc/init.d/chandelier ]; then
-    ln -s /root/Chandelier/chandelier.sh /etc/init.d/chandelier
-fi
+echo "Copying daemon script"
+cp -f /root/Chandelier/chandelier.sh /etc/init.d/chandelier
+chmod a+x /etc/init.d/chandelier
 
 apt-get install python-daemon
 

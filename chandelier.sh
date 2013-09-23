@@ -13,10 +13,7 @@
 # Description: 
 ### END INIT INFO
 
-# Activate the python virtual environment
-    . /path_to_virtualenv/activate
-
-path=/usr/share/chandelier/daemon.py
+path=/usr/share/chandelier/chandelier.py
 
 case "$1" in
   start)
