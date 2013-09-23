@@ -63,18 +63,16 @@ class App():
 						remap(x, 0, fade_steps, curr_g, next_g), \
 						remap(x, 0, fade_steps, curr_b, next_b))
 
-					pinR.ChangeDutyCycle(r)
-					pinG.ChangeDutyCycle(g)
-					pinB.ChangeDutyCycle(b)
-
 					time.sleep(fade_time / fade_steps)
 
 				curr_r = next_r
 				curr_g = next_g
 				curr_b = next_b
-
-				self.led.ChangeDutyCycle(curr_r, curr_g, curr_b)
-			except:
+                        except urllib2.HTTPError:
+                            pass
+                        except urllib2.URLError:
+                            pass
+			finally:
 				pass
 
 			time.sleep(pause)
