@@ -17,7 +17,7 @@ password = "porcelain"
 key = "%2B16475600832"
 source = "https://medalta.webscript.io/next?from=" + key
 
-frequency=50
+frequency=120
 fade_time=5.0
 fade_steps=60
 pause=5.0
@@ -42,8 +42,8 @@ class App():
 		curr_g = 100.0
 		curr_b = 100.0
 
-		led = rgbled(13, 15, 11, frequency)
-		led.ChangeDutyCycle(100.0, 100.0, 100.0)
+		self.led = rgbled(13, 15, 11, frequency)
+		self.led.start(100.0, 100.0, 100.0)
 
 		while True:
 			try:
@@ -58,7 +58,7 @@ class App():
 				curr_g = next_g
 				curr_b = next_b
 
-				led.ChangeDutyCycle(curr_r, curr_g, curr_b)
+				self.led.ChangeDutyCycle(curr_r, curr_g, curr_b)
 			except:
 				pass
 
