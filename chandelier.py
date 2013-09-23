@@ -1,5 +1,6 @@
 import logging
 import time
+import signal
 
 import RPi.GPIO as GPIO
 from daemon import runner
@@ -12,19 +13,21 @@ class App():
 		self.pidfile_path =  '/var/run/chandelier/chandelier.pid'
 		self.pidfile_timeout = 5
 
-	def __del__(self):
-		GPIO.cleanup()
-
 	def run(self):
 		GPIO.setmode(GPIO.BOARD)
 		GPIO.setup(11, GPIO.OUT)
 		GPIO.setup(13, GPIO.OUT)
 		GPIO.setup(15, GPIO.OUT)
 
+		signal.signal(signal.SIGTERM, self.shutdown)
+
 		while True:
 			pass
 
-daemon_runner = runner.DaemonRunner(app)
+	def shutdown():
+		GPIO.cleanup()
+
+daemon_runner = runner.DaemonRunner(App())
 #This ensures that the logger file handle does not get closed during daemonization
 #daemon_runner.daemon_context.files_preserve=[handler.stream]
 daemon_runner.do_action()
