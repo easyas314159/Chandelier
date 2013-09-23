@@ -30,7 +30,7 @@ class App():
 		self.stdin_path = '/dev/null'
 		self.stdout_path = '/dev/tty'
 		self.stderr_path = '/dev/tty'
-		self.pidfile_path =  '/var/run/chandelier/chandelier.pid'
+		self.pidfile_path =  '/var/run/chandelier.pid'
 		self.pidfile_timeout = 5
 
 	def run(self):
@@ -68,11 +68,9 @@ class App():
 				curr_r = next_r
 				curr_g = next_g
 				curr_b = next_b
-                        except urllib2.HTTPError:
-                            pass
-                        except urllib2.URLError:
-                            pass
-			finally:
+			except urllib2.HTTPError:
+            	pass
+			except urllib2.URLError:
 				pass
 
 			time.sleep(pause)
