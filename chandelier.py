@@ -69,7 +69,7 @@ class App():
 				curr_g = next_g
 				curr_b = next_b
 			except urllib2.HTTPError:
-            	pass
+				pass
 			except urllib2.URLError:
 				pass
 
