@@ -59,54 +59,57 @@ class App():
 		self.led = rgbled(13, 15, 11, self.frequency)
 		self.led.start(100.0, 100.0, 100.0)
 
-                atexit.register(shutdown, self)
+		atexit.register(shutdown, self)
 		while True:
 			try:
 				data = urllib2.urlopen(request)
 				data = json.load(data)
 
-                                logger.info(data)
+				logger.info(data)
 
 				next_r = 100.0 * (1.0 - data["rgb"]["red"] / 255.0)
 				next_g = 100.0 * (1.0 - data["rgb"]["green"] / 255.0)
 				next_b = 100.0 * (1.0 - data["rgb"]["blue"] / 255.0)
 
-                                self.fade(next_r, next_g, next_b)
+				self.fade(next_r, next_g, next_b)
 			except urllib2.HTTPError:
 				pass
 			except urllib2.URLError:
 				pass
-                        except Exception as ex:
-                            logger.error(ex)
+			except Exception as ex:
+				logger.error(ex)
 
 			time.sleep(self.hold_time)
 
-        def fade(self, next_r, next_g, next_b):
-            for x in range(0, self.fade_steps, 1):
-                self.led.ChangeDutyCycle( \
-                    remap(x, 0, self.fade_steps, self.curr_r, next_r), \
-                        remap(x, 0, self.fade_steps, self.curr_g, next_g), \
-                        remap(x, 0, self.fade_steps, self.curr_b, next_b))
+		def fade(self, next_r, next_g, next_b):
+			for x in range(1, self.fade_steps + 1, 1):
+				self.led.ChangeDutyCycle( \
+					remap(x, 0, self.fade_steps, self.curr_r, next_r), \
+					remap(x, 0, self.fade_steps, self.curr_g, next_g), \
+					remap(x, 0, self.fade_steps, self.curr_b, next_b))
 
-                time.sleep(self.fade_delay)
+				time.sleep(self.fade_delay)
 
-            self.curr_r = next_r
-            self.curr_g = next_g
-            self.curr_b = next_b
+			self.curr_r = next_r
+			self.curr_g = next_g
+			self.curr_b = next_b
 
         def configure(self):
             try:
-                data = urllib2.urlopen(config)
-                data = json.load(data)
+				data = urllib2.urlopen(config)
+				data = json.load(data)
 
-                self.frequency = data["frequency"]
-                self.fade_time = data["fade_time"]
-                self.fade_steps = data["fade_steps"]
-                self.hold_time = data["hold_time"]
-
-                self.fade_delay = float(self.fade_time) / float(self.fade_steps)
+				self.frequency = data["frequency"]
+				self.fade_time = data["fade_time"]
+				self.fade_steps = data["fade_steps"]
+				self.hold_time = data["hold_time"]
             except:
-                pass
+				self.frequency = 120
+				self.fade_time = 10.0
+				self.fade_steps = 80
+				self.hold_time = 10.0
+
+			self.fade_delay = float(self.fade_time) / float(self.fade_steps)
 
 	def shutdown(self):
             logger.info("Shutting down")
