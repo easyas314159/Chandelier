@@ -41,6 +41,8 @@ class App():
 		self.pidfile_path =  '/var/run/chandelier.pid'
 		self.pidfile_timeout = 5
 
+		self.last_config = 0.0
+
 	def run(self):
                 self.configure()
                 logger.info(self.fade_delay)
@@ -70,6 +72,9 @@ class App():
 				next_r = 100.0 * (1.0 - data["rgb"]["red"] / 255.0)
 				next_g = 100.0 * (1.0 - data["rgb"]["green"] / 255.0)
 				next_b = 100.0 * (1.0 - data["rgb"]["blue"] / 255.0)
+
+				if 60.0 < (time.clock() - self.last_config):
+					self.configure()
 
 				self.fade(next_r, next_g, next_b)
 			except urllib2.HTTPError:
@@ -103,11 +108,19 @@ class App():
 				self.fade_time = data["fade_time"]
 				self.fade_steps = data["fade_steps"]
 				self.hold_time = data["hold_time"]
+
+				self.last_config = time.clock()
             except:
+				pass
+
+			if self.frequency < 1.0:
 				self.frequency = 120
+			if self.fade_time < 0.0:
 				self.fade_time = 10.0
-				self.fade_steps = 80
-				self.hold_time = 10.0
+			if self.fade_steps < 1:
+				self.fade_steps = 1
+			if self.hold_time < 0.0:
+				self.hold_time = 0.0
 
 			self.fade_delay = float(self.fade_time) / float(self.fade_steps)
 
