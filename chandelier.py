@@ -27,11 +27,11 @@ source = "https://medalta.webscript.io/next?from=" + key
 config = "https://medalta.webscript.io/config"
 
 def remap(v, fromLo, fromHi, toLo, toHi):
-    return (toHi - toLo) * (v - fromLo) / (fromHi - fromLo) + toLo
+	return (toHi - toLo) * (v - fromLo) / (fromHi - fromLo) + toLo
 
 def shutdown(app):
-    app.shutdown()
-    pass
+	app.shutdown()
+	pass
 
 class App():
 	def __init__(self):
@@ -99,8 +99,8 @@ class App():
 			self.curr_g = next_g
 			self.curr_b = next_b
 
-        def configure(self):
-            try:
+		def configure(self):
+			try:
 				data = urllib2.urlopen(config)
 				data = json.load(data)
 
@@ -110,11 +110,11 @@ class App():
 				self.hold_time = data["hold_time"]
 
 				self.last_config = time.clock()
-            except:
+			except:
 				pass
 
 			if self.frequency < 1.0:
-				self.frequency = 120
+				self.frequency = 1.0
 			if self.fade_time < 0.0:
 				self.fade_time = 10.0
 			if self.fade_steps < 1:
