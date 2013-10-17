@@ -12,7 +12,7 @@ import traceback
 
 import RPi.GPIO as GPIO
 from daemon import runner
-
+from pca9685 import PCA9685
 from rgbled import rgbled
 
 import ConfigParser
@@ -48,6 +48,12 @@ class App():
 		self.last_config = 0.0
 
 	def run(self):
+		try:
+			self.wrapper()
+		except Exception as ex:
+			logger.error(ex)
+
+	def wrapper(self):
 		logger.info("Starting")
 		self.configure()
 
@@ -58,12 +64,17 @@ class App():
 		GPIO.setwarnings(False)
 		GPIO.setmode(GPIO.BOARD)
 
-		self.curr_r = 100.0
-		self.curr_g = 100.0
-		self.curr_b = 100.0
+		GPIO.setup(11, GPIO.OUT)
+		self._pwm = PCA9685(0x40, 11)
+		self._pwm.frequency(10000)
+		self._pwm.enable(True)
 
-		self.led = rgbled(13, 15, 11, self.frequency)
-		self.led.start(100.0, 100.0, 100.0)
+		self.curr_r = 0xfff
+		self.curr_g = 0xfff
+		self.curr_b = 0xfff
+
+		self.led = rgbled(self._pwm, 1, 2, 0)
+		self.led.set(0xfff, 0xfff, 0xfff)
 
 		atexit.register(shutdown, self)
 		while True:
@@ -73,9 +84,13 @@ class App():
 
 				logger.info(data)
 
-				next_r = 100.0 * (1.0 - data["rgb"]["red"] / 255.0)
-				next_g = 100.0 * (1.0 - data["rgb"]["green"] / 255.0)
-				next_b = 100.0 * (1.0 - data["rgb"]["blue"] / 255.0)
+				next_r = 1.0 - data["rgb"]["red"] / 255.0
+				next_g = 1.0 - data["rgb"]["green"] / 255.0
+				next_b = 1.0 - data["rgb"]["blue"] / 255.0
+
+				next_r *= 0xfff
+				next_g *= 0xfff
+				next_b *= 0xfff
 
 				elapsed = time.time() - self.last_config
 				if elapsed > rate_reconfig:
@@ -92,13 +107,18 @@ class App():
 			time.sleep(self.hold_time)
 
 	def fade(self, next_r, next_g, next_b):
-		for x in range(1, self.fade_steps + 1, 1):
-			self.led.ChangeDutyCycle( \
-				remap(x, 0, self.fade_steps, self.curr_r, next_r), \
-				remap(x, 0, self.fade_steps, self.curr_g, next_g), \
-				remap(x, 0, self.fade_steps, self.curr_b, next_b))
+		fade_steps = min(511, max( \
+			abs(self.curr_r - next_r), \
+			abs(self.curr_g - next_g), \
+			abs(self.curr_b - next_b)))
 
-			time.sleep(self.fade_delay)
+		fade_delay = float(self.fade_time) / float(fade_steps)
+
+		for x in range(1, int(fade_steps) + 1, 1):
+			self.led.set( \
+				remap(x, 0, fade_steps, self.curr_r, next_r), \
+				remap(x, 0, fade_steps, self.curr_g, next_g), \
+				remap(x, 0, fade_steps, self.curr_b, next_b))
 
 		self.curr_r = next_r
 		self.curr_g = next_g
@@ -113,7 +133,6 @@ class App():
 
 			self.frequency = data["frequency"]
 			self.fade_time = data["fade_time"]
-			self.fade_steps = data["fade_steps"]
 			self.hold_time = data["hold_time"]
 
 			self.last_config = time.time()
@@ -121,15 +140,11 @@ class App():
 			logger.warning(ex)
 
 		if self.frequency < 1.0:
-			self.frequency = 1.0
+			self.frequency = 1000.0
 		if self.fade_time < 0.0:
 			self.fade_time = 10.0
-		if self.fade_steps < 1:
-			self.fade_steps = 1
 		if self.hold_time < 0.0:
 			self.hold_time = 0.0
-
-		self.fade_delay = float(self.fade_time) / float(self.fade_steps)
 
 	def shutdown(self):
             logger.info("Shutting down")
