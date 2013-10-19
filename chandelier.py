@@ -26,7 +26,7 @@ password = cfg.get("AUTH", "password")
 
 key = urllib.quote(key)
 source = "https://medalta.webscript.io/next?from=" + key
-config = "https://medalta.webscript.io/config"
+config = "https://medalta.webscript.io/config?from=" + key
 
 rate_reconfig = 60.0
 
